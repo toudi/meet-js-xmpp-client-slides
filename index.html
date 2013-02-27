@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pl">
+	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="http://lab.hakim.se/reveal-js/css/reveal.min.css" />
+		<link rel="stylesheet" href="http://lab.hakim.se/reveal-js/css/theme/night.css" id="theme" />
+		<link rel="stylesheet" href="http://lab.hakim.se/reveal-js/lib/css/zenburn.css" />
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h2>Klient sieci XMPP/Jabber w JavaScript</h2>
+					<h4>toudi a.k.a. Mateusz Mikołajczyk</h4>
+				</section>
+				<section>
+					<h2>Czy ktoś powiedział 'chat?'</h2>
+					<h4>No nie... kolejne demo chata w node.js... :/</h4>
+				</section>
+				<section>
+					<h2>Dostępne biblioteki</h2>
+					<ul>
+						<li><a href="https://github.com/metajack/strophejs">Strophe.js</a></li>
+						<li><a href="https://github.com/sonnyp/lightstring">lightstring</a></li>
+						<li><a href="https://github.com/sstrigler/JSJaC">JSJaC</a></li>
+						<li><a href="http://xmpp.org/xmpp-software/libraries/">http://xmpp.org/xmpp-software/libraries/</a></li>
+					</ul>
+				</section>
+				<section>
+					<h3>Gdzie szukać pomocy?</h3>
+					<img src="img/tysonreaction.gif" />
+					<p>google :: xmpp jquery (książka)</p>
+					<p><a href="http://xmpp.org/extensions/xep-0045.html">http://xmpp.org/extensions/xep-0045.html</a></p>
+				</section>
+				<section>
+					<section>
+					<h2>Historie zmagań</h2>
+					<ul>
+						<li>Bezpośrednie użycie strophe.js</li>
+						<li>Mootools</li>
+						<li>Nicholas Zakas - scalable application</li>
+					</ul>
+				</section>
+					<section>
+						<h2>Bezpośrednie użycie strophe.js</h2>
+						<pre><code>
+						$(function(){
+						    var connection = new Strophe("http://serwer/");
+
+						    $("#login").click(function(){
+							        connection.connect( ..., function(status) {
+
+							        } );
+						    });
+
+						    connection.
+						});
+						</code></pre>
+					</section>
+					<section>
+						<h2>Mootools</h2>
+						<h3>Abstrakcyjna/bazowa klasa ChatClient</h3>
+						<pre><code>
+						var XMPPClient = new Class({
+						    initialize: function(url) {
+						        this.connection = new Strophe(url);
+						    },
+
+						    connect: function(jid, password) {
+						        var that = this;
+						        this.connection.connect( ... , function(status) {
+						            that.connected();
+						        })
+						    }
+					});
+						</code></pre>
+					</section>
+					<section>
+						<h2>Mootools</h2>
+						<h3>Klasa dziedzicząca zawierająca handlery</h3>
+						<pre><code>
+						var MyXmppClient = new Class({
+						    extends: XMPPClient,
+
+						    connected: function() {
+						        ....
+						    }
+					});
+						</code>
+						</pre>
+					</section>
+					<section>
+						<h2>Mootools</h2>
+						<h3>Inicjalizacja</h3>
+						<pre><code>
+						$(function(){
+						    var client = new MyXmppClient('http://serwer/');
+						});
+						</code></pre>
+					</section>
+					<section>
+						<h2>Użycie AMD</h2>
+						<a href="https://github.com/patrick99e99/scalable-js-architecture-app">scalable js architecture</a>
+						<p>Wydzielenie modułów</p>
+						<ul>
+							<li>connection</li>
+							<li>roster</li>
+							<li>chat</li>
+						</ul>
+					</section>					
+				</section>
+				<section>
+					<h1>Formy transportu</h1>
+					<ol>
+						<li>BOSH / HTTP Binding</li>
+						<li>WebSockety</li>
+						<li>Attach</li>
+					</ol>
+				</section>
+				<section>
+					<h2>Porównanie funkcjonalności i wsparcie</h2>
+					<p>0. xmpp-over-websocket NIE wspiera zapisywania stanu</p>
+					<p>1. ANGTFT == Ain't nobody got time for that!</p>
+					<table>
+						<thead>
+							<tr>
+								<th>Biblioteka</th><th>Dokumentacja</th><th>Zapisywanie stanu</th><th>Attach</th><th>Websockety?</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>strophe.js</td><td>techniczna + książka</td><td>1/10</td><td>TAK</td><td>branche</td>
+							</tr>
+							<tr>
+								<td>lightstring</td><td>ANGTFT</td><td>?</td><td>TAK (nadpisywanie rid)</td><td>TAK</td>
+							</tr>
+							<tr>
+								<td>JSJAC</td><td>techniczna + minimalny klient</td><td>TAK</td><td>TAK (konstruktor)</td><td>TAK</td>
+							</tr>
+						</tbody>
+					</table>
+				</section>
+				<section>
+					<h3>Same-origin-policy</h3>
+					<img src="img/options.png" />
+
+					<pre><code>
+					location /xmpp {
+			            proxy_read_timeout 320;
+			            proxy_send_timeout 320;
+			            proxy_connect_timeout 320;
+			            proxy_pass http://localhost:5280/http-bind/;
+			            proxy_buffering off;
+			            tcp_nodelay on;
+        			}					
+					</code></pre>
+				</section>
+				<section>
+					<img src="img/Linus-Torvalds.jpg" />
+					<blockquote>Talk is cheap. Show me the code</blockquote>
+					<p align="right">Linus Torvalds</p>
+				</section>
+				<section>
+					<h1>Dziękuję za uwagę</h1>
+					<img src="img/obama-yawn.jpg" />
+				</section>
+			</div>
+		</div>
+
+		<script type="text/javascript" src="../lib/reveal/head.min.js"></script>
+		<script type="text/javascript" src="../lib/reveal/reveal.min.js"></script>
+
+		<script>
+		Reveal.initialize({
+			theme: 'night',
+			transition: 'linear',
+			history: true,
+			dependencies: [
+				{ src: '../lib/reveal/plugin/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+			]
+		});
+		</script
+	</body>
+</html>
